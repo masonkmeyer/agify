@@ -94,12 +94,12 @@ func NewClient(opts ...ClientOption) *Client {
 	}
 }
 
-// Predict returns the age probabilty for a name
+// Predict returns the age probability for a name
 func (client *Client) Predict(name string) (*Prediction, *RateLimit, error) {
 	return client.PredictWithCountry(name, "")
 }
 
-// PredictWithCountry returns the age probabilty for a name in a country
+// PredictWithCountry returns the age probability for a name in a country
 func (client *Client) PredictWithCountry(name string, country string) (*Prediction, *RateLimit, error) {
 	url, _ := url.Parse(client.baseUrl)
 	values := url.Query()
@@ -132,12 +132,12 @@ func (client *Client) PredictWithCountry(name string, country string) (*Predicti
 	return &prediction, rateLimit, nil
 }
 
-// BatchPredict returns the age probabilty for a list of names
+// BatchPredict returns the age probability for a list of names
 func (client *Client) BatchPredict(names []string) (*[]Prediction, *RateLimit, error) {
 	return client.BatchPredictWithCountry(names, "")
 }
 
-// BatchPredict returns the age probabilty for a list of names in a country
+// BatchPredict returns the age probability for a list of names in a country
 func (client *Client) BatchPredictWithCountry(names []string, country string) (*[]Prediction, *RateLimit, error) {
 	url, _ := url.Parse(client.baseUrl)
 	values := url.Query()
