@@ -9,7 +9,7 @@ import (
 )
 
 func TestShouldCreateNewClient(t *testing.T) {
-	client := NewClient(nil, "not-applicable")
+	client := NewClient()
 	assert.NotNil(t, client)
 }
 
@@ -23,7 +23,7 @@ func TestShouldGetPredictionForName(t *testing.T) {
 	}))
 	defer server.Close()
 
-	client := NewClient(nil, server.URL)
+	client := NewClient(WithUrl(server.URL))
 
 	result, rateLimit, err := client.Predict("michael")
 	assert.Nil(t, err)
@@ -44,7 +44,7 @@ func TestShouldGetErrorWhenUnauthorized(t *testing.T) {
 	}))
 	defer server.Close()
 
-	client := NewClient(nil, server.URL)
+	client := NewClient(WithUrl(server.URL))
 	result, rateLimit, err := client.Predict("michael")
 
 	assert.Nil(t, result)
@@ -59,7 +59,7 @@ func TestShouldGetErrorWhenTooManyRequests(t *testing.T) {
 	}))
 	defer server.Close()
 
-	client := NewClient(nil, server.URL)
+	client := NewClient(WithUrl(server.URL))
 	result, rateLimit, err := client.Predict("michael")
 
 	assert.Nil(t, result)
@@ -74,10 +74,15 @@ func TestShouldGetErrorWhenUnprocessable(t *testing.T) {
 	}))
 	defer server.Close()
 
-	client := NewClient(nil, server.URL)
+	client := NewClient(WithUrl(server.URL))
 	result, rateLimit, err := client.Predict("michael")
 
 	assert.Nil(t, result)
 	assert.NotNil(t, rateLimit)
 	assert.NotNil(t, err)
+}
+
+func TestShouldOverrideDefaults(t *testing.T) {
+	client := NewClient(WithUrl("http://localhost:8080"), WithClient(&http.Client{}), WithApiKey("test-key"))
+	assert.NotNil(t, client)
 }

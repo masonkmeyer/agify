@@ -8,35 +8,89 @@ import (
 	"net/url"
 )
 
-type RateLimit struct {
-	Limit     string
-	Remaining string
-	Reset     string
+type (
+	// Client is the client to call agify.io
+	Client struct {
+		apiKey  string
+		baseUrl string
+		http    *http.Client
+	}
+
+	// clientDefaults is a struct used to hold the default values for the client
+	clientDefaults struct {
+		apiKey  string
+		baseUrl string
+		http    *http.Client
+	}
+
+	// ClientOption is a function that can be used to configure the client
+	ClientOption func(*clientDefaults)
+
+	// Prediction is the age prediction for a name
+	Prediction struct {
+		// Name is the name that was queried
+		Name string `json:"name"`
+		// Age is the predicted age
+		Age int `json:"age"`
+		// Count is the number of people with the same name
+		Count int `json:"count"`
+		// Country is the country that was queried
+		Country string `json:"country_id"`
+	}
+
+	// RateLimit is the rate limiting information from the API
+	RateLimit struct {
+		Limit     string
+		Remaining string
+		Reset     string
+	}
+
+	// errorResponse is the error response from the agify API
+	errorResponse struct {
+		Error string `json:"error"`
+	}
+)
+
+// WithApiKey overrides the default API key
+func WithUrl(baseUrl string) ClientOption {
+	return func(client *clientDefaults) {
+		client.baseUrl = baseUrl
+	}
 }
 
-type Prediction struct {
-	Name    string `json:"name"`
-	Age     int    `json:"age"`
-	Count   int    `json:"count"`
-	Country string `json:"country_id"`
+// WithApiKey overrides the default API key
+func WithApiKey(apiKey string) ClientOption {
+	return func(client *clientDefaults) {
+		client.apiKey = apiKey
+	}
 }
 
-type Client struct {
-	apiKey  *string
-	baseUrl string
-	http    *http.Client
+// WithClient overrides the default http client
+func WithClient(httpClient *http.Client) ClientOption {
+	return func(client *clientDefaults) {
+		client.http = httpClient
+	}
 }
 
-type errorResponse struct {
-	Error string `json:"error"`
-}
-
-// NewClient creates a new client for agify.io
-func NewClient(apiKey *string, baseUrl string) *Client {
-	return &Client{
-		apiKey:  apiKey,
-		baseUrl: baseUrl,
+// NewClient creates a client to call agify.io
+// By default, the client will use the public API URL without an API key.
+// The default configuration can be overridden by passing in options.
+func NewClient(opts ...ClientOption) *Client {
+	// We use the default option to prevent Client options from having access to private data in the client
+	defaults := &clientDefaults{
+		apiKey:  "",
+		baseUrl: "https://api.agify.io",
 		http:    &http.Client{},
+	}
+
+	for _, opt := range opts {
+		opt(defaults)
+	}
+
+	return &Client{
+		apiKey:  defaults.apiKey,
+		baseUrl: defaults.baseUrl,
+		http:    defaults.http,
 	}
 }
 
@@ -56,8 +110,8 @@ func (client *Client) PredictWithCountry(name string, country string) (*Predicti
 		values.Add("country_id", country)
 	}
 
-	if client.apiKey != nil {
-		values.Add("apikey", *client.apiKey)
+	if client.apiKey != "" {
+		values.Add("apikey", client.apiKey)
 	}
 
 	url.RawQuery = values.Encode()
@@ -94,8 +148,8 @@ func (client *Client) BatchPredictWithCountry(names []string, country string) (*
 		values.Add("name[]", name)
 	}
 
-	if client.apiKey != nil {
-		values.Add("apikey", *client.apiKey)
+	if client.apiKey != "" {
+		values.Add("apikey", client.apiKey)
 	}
 
 	url.RawQuery = values.Encode()
