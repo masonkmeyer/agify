@@ -83,6 +83,19 @@ func TestShouldGetErrorWhenUnprocessable(t *testing.T) {
 }
 
 func TestShouldOverrideDefaults(t *testing.T) {
-	client := NewClient(WithUrl("http://localhost:8080"), WithClient(&http.Client{}), WithApiKey("test-key"))
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		assert.Equal(t, "test-key", r.URL.Query().Get("apikey"))
+		assert.Equal(t, "michael", r.URL.Query().Get("name"))
+
+		w.WriteHeader(http.StatusUnprocessableEntity)
+		w.Write([]byte(`{ "error": "testing" }`))
+	}))
+
+	defer server.Close()
+
+	client := NewClient(WithUrl(server.URL), WithClient(&http.Client{}), WithApiKey("test-key"))
 	assert.NotNil(t, client)
+
+	_, _, err := client.Predict("michael")
+	assert.NotNil(t, err)
 }
