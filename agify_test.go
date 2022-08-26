@@ -99,3 +99,20 @@ func TestShouldOverrideDefaults(t *testing.T) {
 	_, _, err := client.Predict("michael")
 	assert.NotNil(t, err)
 }
+
+func TestShouldHandleBatchPrediction(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		names := r.URL.Query()["name[]"]
+		assert.NotNil(t, names)
+		assert.Len(t, names, 3)
+		w.Write([]byte(`[{"name":"michael","age":70,"count":233482},{"name":"matthew","age":36,"count":34742},{"name":"jane","age":36,"count":35010}]`))
+	}))
+	defer server.Close()
+
+	client := NewClient(WithUrl(server.URL))
+
+	result, _, err := client.BatchPredict([]string{"michael", "matthew", "jane"})
+	assert.Nil(t, err)
+	assert.Len(t, result, 3)
+}

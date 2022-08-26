@@ -133,12 +133,12 @@ func (client *Client) PredictWithCountry(name string, country string) (*Predicti
 }
 
 // BatchPredict returns the age probability for a list of names
-func (client *Client) BatchPredict(names []string) (*[]Prediction, *RateLimit, error) {
+func (client *Client) BatchPredict(names []string) ([]Prediction, *RateLimit, error) {
 	return client.BatchPredictWithCountry(names, "")
 }
 
 // BatchPredict returns the age probability for a list of names in a country
-func (client *Client) BatchPredictWithCountry(names []string, country string) (*[]Prediction, *RateLimit, error) {
+func (client *Client) BatchPredictWithCountry(names []string, country string) ([]Prediction, *RateLimit, error) {
 	url, _ := url.Parse(client.baseUrl)
 	values := url.Query()
 
@@ -166,7 +166,7 @@ func (client *Client) BatchPredictWithCountry(names []string, country string) (*
 		return nil, rateLimit, err
 	}
 
-	return &predictions, rateLimit, nil
+	return predictions, rateLimit, nil
 }
 
 // get makes the API request and returns the response body
