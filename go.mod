@@ -1,4 +1,4 @@
-module github.com/masonkmeyer/agify-api
+module github.com/masonkmeyer/agify
 
 go 1.19
 
