@@ -1,5 +1,5 @@
 [![Go Report](https://goreportcard.com/badge/github.com/masonkmeyer/agify)](https://goreportcard.com/badge/github.com/masonkmeyer/agify)
-![Build](https://github.com/github/docs/actions/workflows/build.yml/badge.svg)
+![Build](https://github.com/masonkmeyer/agify/actions/workflows/build.yml/badge.svg)
 
 # Agify 
  
